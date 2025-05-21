@@ -1,253 +1,446 @@
-let cart = [];
-let slideIndex = 0;
-let slides;
+document.addEventListener("DOMContentLoaded", function() {
+  console.log("Viettel Store - Initializing application...");
 
-document.addEventListener("DOMContentLoaded", function () {
-  console.log("DOM fully loaded, initializing scripts...");
+  // ========== KHAI BÁO BIẾN TOÀN CỤC ==========
+  let cart = JSON.parse(localStorage.getItem('cart')) || [];
+  let slideIndex = 0;
+  let slides;
 
-  // Initialize cart count display
-  const cartCount = document.getElementById("cart-count");
-  if (!cartCount) {
-    console.error("Cart count element not found.");
-  }
-
-  // Handle "Mua ngay" buttons
-  const buyButtons = document.querySelectorAll(".buy-button");
-  if (buyButtons.length === 0) {
-    console.error("No buy buttons found.");
-  } else {
-    buyButtons.forEach((button) => {
-      button.addEventListener("click", function () {
-        const name = this.getAttribute("data-name");
-        const price = parseInt(this.getAttribute("data-price"));
-        if (isNaN(price) || !name) {
-          console.error("Invalid data-name or data-price:", { price, name });
-          alert("Lỗi: Thông tin sản phẩm không hợp lệ!");
-          return;
-        }
-        console.log(`Adding to cart: ${name} - ${price}₫`);
-        addToCart(name, price);
-        showCart();
-        alert(`${name} đã được thêm vào giỏ hàng!`);
-      });
-    });
-  }
-
-  // Handle cart link click
-  const cartLink = document.getElementById("cart-link");
-  if (!cartLink) {
-    console.error("Cart link not found.");
-  } else {
-    cartLink.addEventListener("click", function (event) {
-      event.preventDefault();
-      console.log("Cart link clicked, showing cart...");
-      showCart();
-    });
-  }
-
-  // Handle proceed to payment
-  const proceedButton = document.getElementById("proceed-to-payment");
-  if (!proceedButton) {
-    console.error("Proceed to payment button not found.");
-  } else {
-    proceedButton.addEventListener("click", function () {
-      const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-      if (total === 0) {
-        alert("Giỏ hàng trống!");
-        console.log("Cart is empty, cannot proceed to payment.");
-        return;
-      }
-      const names = cart.map((item) => `${item.name} (${item.quantity})`).join(", ");
-      console.log(`Proceeding to payment: ${total}₫ for ${names}`);
-      showPayment(total, names);
-    });
-  }
-
-  // Handle clear cart
-  const clearCartButton = document.getElementById("clear-cart");
-  if (!clearCartButton) {
-    console.error("Clear cart button not found.");
-  } else {
-    clearCartButton.addEventListener("click", function () {
-      console.log("Clearing cart...");
-      cart = [];
-      updateCartDisplay();
-      if (cartCount) cartCount.textContent = `(0)`;
-      alert("Giỏ hàng đã được xóa!");
-    });
-  }
-
-  // Initial cart display
-  updateCartDisplay();
-});
-
-// Add product to cart
-function addToCart(name, price) {
-  const existing = cart.find((item) => item.name === name);
-  if (existing) {
-    existing.quantity += 1;
-  } else {
-    cart.push({ name, price, quantity: 1 });
-  }
-  console.log("Current cart:", cart);
-  updateCartDisplay();
-}
-
-// Update cart display
-function updateCartDisplay() {
-  const cartItemsBody = document.getElementById("cart-items");
-  const emptyCartMessage = document.getElementById("empty-cart-message");
-  const totalPrice = document.getElementById("total-price");
-  const cartCount = document.getElementById("cart-count");
-
-  if (!cartItemsBody || !emptyCartMessage || !totalPrice || !cartCount) {
-    console.error("One or more cart elements not found:", {
-      cartItemsBody,
-      emptyCartMessage,
-      totalPrice,
-      cartCount,
-    });
-    return;
-  }
-
-  // Clear existing items
-  cartItemsBody.innerHTML = "";
-
-  // Show or hide empty message
-  if (cart.length === 0) {
-    emptyCartMessage.style.display = "block";
-  } else {
-    emptyCartMessage.style.display = "none";
-    cart.forEach((item, index) => {
-      const subtotal = item.price * item.quantity;
-      const row = document.createElement("tr");
-      row.innerHTML = `
-        <td>${item.name}</td>
-        <td>${item.price.toLocaleString()} ₫</td>
-        <td>
-          <input type="number" value="${item.quantity}" min="1" onchange="updateQuantity(${index}, this.value)">
-        </td>
-        <td>${subtotal.toLocaleString()} ₫</td>
-        <td><button onclick="removeFromCart(${index})">Xóa</button></td>
-      `;
-      cartItemsBody.appendChild(row);
-    });
-  }
-
-  // Update total
-  const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  totalPrice.textContent = `${total.toLocaleString()}`;
-  cartCount.textContent = `(${cart.length})`;
-  console.log("Cart display updated, total:", total);
-}
-
-// Update quantity
-function updateQuantity(index, quantity) {
-  const qty = parseInt(quantity);
-  if (qty >= 1) {
-    cart[index].quantity = qty;
-    console.log(`Updated quantity for item ${index} to ${qty}`);
-    updateCartDisplay();
-  } else {
-    console.error("Invalid quantity:", qty);
-  }
-}
-
-// Remove item from cart
-function removeFromCart(index) {
-  if (index >= 0 && index < cart.length) {
-    console.log(`Removing item at index ${index}`);
-    cart.splice(index, 1);
-    updateCartDisplay();
-  } else {
-    console.error("Invalid index for removal:", index);
-  }
-}
-
-// Show cart section
-function showCart() {
-  const cartSection = document.getElementById("cart");
-  const paymentSection = document.getElementById("payment");
-  if (!cartSection) {
-    console.error("Cart section not found.");
-    return;
-  }
-  cartSection.style.display = "block";
-  if (paymentSection) paymentSection.style.display = "none";
-  cartSection.scrollIntoView({ behavior: "smooth" });
-  updateCartDisplay();
-  console.log("Cart section displayed.");
-}
-
-// Payment Functionality
-function showPayment(total, names) {
-  const paymentSection = document.getElementById("payment");
-  const cartSection = document.getElementById("cart");
-  if (!paymentSection) {
-    console.error("Payment section not found.");
-    return;
-  }
-  paymentSection.style.display = "block";
-  if (cartSection) cartSection.style.display = "none";
-  paymentSection.scrollIntoView({ behavior: "smooth" });
-
-  const payButton = document.getElementById("pay-button");
-  if (!payButton) {
-    console.error("Pay button not found.");
-    return;
-  }
-  payButton.onclick = function (event) {
-    event.preventDefault();
-    const paymentInfo = `Thanh toán: ${total.toLocaleString()} VND cho ${names}`;
-    const paymentInfoElement = document.getElementById("payment-info");
-    const qrCodeElement = document.getElementById("qr-code");
-    const qrCodeDiv = document.getElementById("qrcode");
-    if (!paymentInfoElement || !qrCodeElement || !qrCodeDiv) {
-      console.error("Payment info, QR code element, or QR code div not found.");
-      return;
+  // Dữ liệu sản phẩm
+  const products = [
+    {
+      id: 1,
+      name: "Loa vi tính SoundMax A828",
+      originalPrice: 14390000,
+      discountPrice: 11590000,  
+      discountPercentage: 19,
+      category: "tv",
+      image: "Viettel store/Loa vi tính SoundMax A828.webp",
+      description: ""
+    },
+    {
+      id: 2,
+      name: "Daikin Inverter 1.5 HP ATKB35ZVMV",
+      originalPrice: 6990000,
+      discountPrice: 4890000,
+      discountPercentage: 30,
+      category: "appliance",
+      image: "Viettel store/Máy lạnh Daikin Inverter 1.5 HP ATKB35ZVMV.webp",
+      description: ""
+    },
+    {
+      id: 3,
+      name: "Loa Bluetooth Karaoke Soundmax M33",
+      originalPrice: 4590000,
+      discountPrice: 3490000,
+      discountPercentage: 24,
+      category: "appliance",
+      image: "Viettel store/Loa Bluetooth Karaoke Soundmax M33.webp",
+      description: ""
     }
-    paymentInfoElement.innerText = paymentInfo;
+  ];
 
-    // Clear old QR code
-    qrCodeDiv.innerHTML = "";
+  // ========== DOM ELEMENTS ==========
+  const elements = {
+    cartCount: document.getElementById('cart-count'),
+    cartLink: document.getElementById('cart-link'),
+    cartSection: document.getElementById('cart'),
+    cartItemsBody: document.getElementById('cart-items'),
+    emptyCartMessage: document.getElementById('empty-cart-message'),
+    totalPrice: document.getElementById('total-price'),
+    clearCartBtn: document.getElementById('clear-cart'),
+    proceedButton: document.getElementById('proceed-to-payment'),
+    productsGrid: document.getElementById('products-grid'),
+    searchInput: document.getElementById('search-input'),
+    searchBtn: document.getElementById('search-btn'),
+    buyButtons: document.querySelectorAll('.buy-button'),
+    paymentSection: document.getElementById('payment'),
+    checkoutSection: document.getElementById('checkout-section'),
+    checkoutForm: document.getElementById('checkout-form'),
+    submitOrderBtn: document.getElementById('submit-order'),
+    backToShopBtn: document.getElementById('back-to-shop'),
+    orderConfirmation: document.getElementById('order-confirmation'),
+    productModal: document.getElementById('product-modal'),
+    productDetail: document.getElementById('product-detail'),
+    closeModal: document.querySelector('.close'),
+    payButton: document.getElementById('pay-button'),
+    paymentInfoElement: document.getElementById('payment-info'),
+    qrCodeElement: document.getElementById('qr-code'),
+    qrCodeDiv: document.getElementById('qrcode'),
+    bannerSlider: document.querySelector('.banner-slider')
+  };
 
-    // Generate dynamic QR code with VietQR
+  // ========== KHỞI TẠO ỨNG DỤNG ==========
+  function init() {
+    renderProducts(products);
+    updateCartCount();
+    renderCartItems();
+    setupEventListeners();
+    initSlider();
+    console.log("Application initialized successfully");
+  }
+
+  // ========== PRODUCT FUNCTIONS ==========
+  function renderProducts(productsToRender) {
+    if (!elements.productsGrid) return;
+
+    elements.productsGrid.innerHTML = '';
+
+    productsToRender.forEach(product => {
+      const productCard = document.createElement('div');
+      productCard.className = 'product-card';
+      productCard.innerHTML = `
+        <img src="${product.image}" alt="${product.name}">
+        <h3>${product.name}</h3>
+        <p>${product.discountPrice.toLocaleString()} ₫</p>
+        <button class="add-to-cart" data-id="${product.id}" 
+          data-name="${product.name}" data-price="${product.discountPrice}">Mua ngay</button>
+      `;
+      elements.productsGrid.appendChild(productCard);
+    });
+  }
+
+  function searchProducts(query) {
+    const filteredProducts = products.filter(product =>
+      product.name.toLowerCase().includes(query.toLowerCase())
+    );
+    renderProducts(filteredProducts);
+  }
+
+  function showProductDetail(productId) {
+    const product = products.find(p => p.id === productId);
+    if (!product || !elements.productDetail) return;
+
+    elements.productDetail.innerHTML = `
+      <div class="product-detail">
+        <div class="product-detail-img">
+          <img src="${product.image}" alt="${product.name}">
+        </div>
+        <div class="product-detail-info">
+          <h2 class="product-detail-name">${product.name}</h2>
+          <p class="product-detail-price">${product.discountPrice.toLocaleString()} ₫</p>
+          <p class="product-detail-desc">${product.description}</p>
+          <button class="add-to-cart" data-id="${product.id}"
+            data-name="${product.name}" data-price="${product.discountPrice}">Thêm vào giỏ hàng</button>
+        </div>
+      </div>
+    `;
+    elements.productModal.classList.add('active');
+  }
+
+  // ========== CART FUNCTIONS ==========
+  function addToCart(name, price, image) {
+    const existing = cart.find(item => item.name === name);
+    if (existing) {
+      existing.quantity += 1;
+    } else {
+      cart.push({ name, price, quantity: 1, image });
+    }
+    updateCart();
+    showToast(`${name} đã được thêm vào giỏ hàng!`);
+  }
+
+  function updateCart() {
+    localStorage.setItem('cart', JSON.stringify(cart));
+    updateCartCount();
+    renderCartItems();
+  }
+
+  function updateCartCount() {
+    if (!elements.cartCount) return;
+    const count = cart.reduce((total, item) => total + item.quantity, 0);
+    elements.cartCount.textContent = count;
+  }
+
+  function renderCartItems() {
+    if (!elements.cartItemsBody || !elements.emptyCartMessage || !elements.totalPrice) return;
+
+    elements.cartItemsBody.innerHTML = '';
+
+    if (cart.length === 0) {
+      elements.emptyCartMessage.style.display = "block";
+    } else {
+      elements.emptyCartMessage.style.display = "none";
+      cart.forEach((item, index) => {
+        const subtotal = item.price * item.quantity;
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>
+            <img src="${item.image || 'images/Viettel store/default-product.jpg'}" alt="${item.name}" class="cart-item-img">
+            ${item.name}
+          </td>
+          <td>${item.price.toLocaleString()} ₫</td>
+          <td>
+            <input type="number" value="${item.quantity}" min="1" 
+              class="quantity-input" data-index="${index}">
+          </td>
+          <td>${subtotal.toLocaleString()} ₫</td>
+          <td><button class="remove-btn" data-index="${index}">Xóa</button></td>
+        `;
+        elements.cartItemsBody.appendChild(row);
+      });
+    }
+
+    const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    elements.totalPrice.textContent = total.toLocaleString();
+  }
+
+  function updateQuantity(index, quantity) {
+    const qty = parseInt(quantity);
+    if (qty >= 1 && index >= 0 && index < cart.length) {
+      cart[index].quantity = qty;
+      updateCart();
+    }
+  }
+
+  function removeFromCart(index) {
+    if (index >= 0 && index < cart.length) {
+      cart.splice(index, 1);
+      updateCart();
+    }
+  }
+
+  function clearCart() {
+    cart = [];
+    updateCart();
+    showToast("Giỏ hàng đã được xóa!");
+  }
+
+  function showCart() {
+    if (!elements.cartSection) return;
+    elements.cartSection.style.display = "block";
+    if (elements.paymentSection) elements.paymentSection.style.display = "none";
+    if (elements.checkoutSection) elements.checkoutSection.classList.remove('active');
+    elements.cartSection.scrollIntoView({ behavior: "smooth" });
+    updateCart();
+  }
+
+  // ========== PAYMENT FUNCTIONS ==========
+  function showPayment(total, names) {
+    if (!elements.paymentSection) return;
+
+    elements.paymentSection.style.display = "block";
+    if (elements.cartSection) elements.cartSection.style.display = "none";
+    if (elements.checkoutSection) elements.checkoutSection.classList.remove('active');
+    elements.paymentSection.scrollIntoView({ behavior: "smooth" });
+
+    if (elements.payButton) {
+      elements.payButton.onclick = function(event) {
+        event.preventDefault();
+        processPayment(total, names);
+      };
+    }
+  }
+
+  function processPayment(total, names) {
+    if (!elements.paymentInfoElement || !elements.qrCodeElement || !elements.qrCodeDiv) return;
+
+    const paymentInfo = `Thanh toán: ${total.toLocaleString()} VND cho ${names}`;
+    elements.paymentInfoElement.innerText = paymentInfo;
+
+    elements.qrCodeDiv.innerHTML = "";
     const description = encodeURIComponent(`Thanh toan ${names}`);
     const qrUrl = `https://img.vietqr.io/image/970415-103879398252-compact2.jpg?amount=${total}&addInfo=${description}&accountName=PHAM%20VU%20TUAN%20NGUYEN`;
 
-    // Display dynamic QR code
-    const qrImage = document.createElement("img");
+    const qrImage = document.createElement('img');
     qrImage.src = qrUrl;
     qrImage.alt = "QR chuyển khoản tự động";
     qrImage.style.maxWidth = "200px";
     qrImage.style.maxHeight = "200px";
-    qrCodeDiv.appendChild(qrImage);
+    qrImage.onerror = () => showToast("Lỗi khi tải mã QR. Vui lòng kiểm tra lại!");
+    qrImage.onload = () => elements.qrCodeElement.style.display = "block";
+    elements.qrCodeDiv.appendChild(qrImage);
 
-    qrCodeElement.style.display = "block";
-    console.log("Displayed dynamic QR code with amount and description.");
-    alert("Đơn hàng đã được xác nhận! Vui lòng quét mã QR để thanh toán.");
-  };
-}
+    showToast("Đơn hàng đã được xác nhận! Vui lòng quét mã QR để thanh toán.");
+  }
 
-// Banner Slider
-window.onload = function () {
-  slides = document.querySelectorAll(".slide");
+  // ========== CHECKOUT FUNCTIONS ==========
+  function processCheckout() {
+    if (!elements.checkoutForm) return false;
 
-  function showSlide(index) {
-    slides.forEach((slide, i) => {
-      slide.classList.remove("active");
-      if (i === index) slide.classList.add("active");
+    const name = document.getElementById('name').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    const address = document.getElementById('address').value.trim();
+
+    if (!name || !email || !phone || !address) {
+      showToast('Vui lòng điền đầy đủ thông tin!');
+      return false;
+    }
+
+    if (!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)) {
+      showToast('Email không hợp lệ!');
+      return false;
+    }
+
+    if (!/^\d{10,11}$/.test(phone)) {
+      showToast('Số điện thoại không hợp lệ!');
+      return false;
+    }
+
+    if (elements.orderConfirmation) {
+      elements.orderConfirmation.classList.add('active');
+      if (elements.checkoutSection) elements.checkoutSection.classList.remove('active');
+      clearCart();
+    }
+
+    return true;
+  }
+
+  // ========== SLIDER FUNCTIONS ==========
+  function initSlider() {
+    if (!elements.bannerSlider) return;
+
+    slides = document.querySelectorAll(".slide");
+    if (slides.length === 0) return;
+
+    function showSlide(index) {
+      slides.forEach((slide, i) => {
+        slide.classList.remove("active");
+        if (i === index) slide.classList.add("active");
+      });
+    }
+
+    window.changeSlide = function(n) {
+      slideIndex = (slideIndex + n + slides.length) % slides.length;
+      showSlide(slideIndex);
+    };
+
+    showSlide(slideIndex);
+    setInterval(() => changeSlide(1), 5000);
+  }
+
+  // ========== UTILITY FUNCTIONS ==========
+  function showToast(message) {
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.textContent = message;
+    document.body.appendChild(toast);
+
+    setTimeout(() => toast.classList.add('show'), 100);
+    setTimeout(() => {
+      toast.classList.remove('show');
+      setTimeout(() => document.body.removeChild(toast), 300);
+    }, 3000);
+  }
+
+  // ========== EVENT LISTENERS ==========
+  function setupEventListeners() {
+    if (elements.searchBtn && elements.searchInput) {
+      elements.searchBtn.addEventListener('click', () => {
+        const query = elements.searchInput.value.trim();
+        if (query) searchProducts(query);
+      });
+
+      elements.searchInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter' && elements.searchInput.value.trim()) {
+          searchProducts(elements.searchInput.value.trim());
+        }
+      });
+    }
+
+    if (elements.productsGrid) {
+      elements.productsGrid.addEventListener('click', (e) => {
+        if (e.target.classList.contains('add-to-cart')) {
+          const id = parseInt(e.target.getAttribute('data-id'));
+          const product = products.find(p => p.id === id);
+          if (product) addToCart(product.name, product.discountPrice, product.image);
+        }
+      });
+    }
+
+    if (elements.buyButtons) {
+      elements.buyButtons.forEach(button => {
+        button.addEventListener('click', () => {
+          const name = button.getAttribute('data-name');
+          const price = parseInt(button.getAttribute('data-price'));
+          if (name && !isNaN(price)) {
+            addToCart(name, price, 'images/Viettel store/default-product.jpg');
+            showCart();
+          }
+        });
+      });
+    }
+
+    if (elements.cartLink) {
+      elements.cartLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        showCart();
+      });
+    }
+
+    if (elements.clearCartBtn) {
+      elements.clearCartBtn.addEventListener('click', clearCart);
+    }
+
+    if (elements.proceedButton) {
+      elements.proceedButton.addEventListener('click', () => {
+        if (cart.length === 0) {
+          showToast("Giỏ hàng trống!");
+          return;
+        }
+        const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+        const names = cart.map(item => item.name).join(", ");
+        if (elements.checkoutSection) elements.checkoutSection.classList.add('active');
+        showPayment(total, names);
+      });
+    }
+
+    if (elements.checkoutForm) {
+      elements.checkoutForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        if (processCheckout()) {
+          if (elements.orderConfirmation) elements.orderConfirmation.classList.add('active');
+        }
+      });
+    }
+
+    if (elements.backToShopBtn) {
+      elements.backToShopBtn.addEventListener('click', () => {
+        if (elements.orderConfirmation) elements.orderConfirmation.classList.remove('active');
+        if (elements.cartSection) elements.cartSection.style.display = "none";
+        if (elements.paymentSection) elements.paymentSection.style.display = "none";
+      });
+    }
+
+    if (elements.closeModal) {
+      elements.closeModal.addEventListener('click', () => {
+        if (elements.productModal) elements.productModal.classList.remove('active');
+        if (elements.checkoutSection) elements.checkoutSection.classList.remove('active');
+        if (elements.orderConfirmation) elements.orderConfirmation.classList.remove('active');
+      });
+    }
+
+    if (elements.cartItemsBody) {
+      elements.cartItemsBody.addEventListener('input', (e) => {
+        if (e.target.classList.contains('quantity-input')) {
+          const index = parseInt(e.target.dataset.index);
+          updateQuantity(index, e.target.value);
+        }
+      });
+
+      elements.cartItemsBody.addEventListener('click', (e) => {
+        if (e.target.classList.contains('remove-btn')) {
+          const index = parseInt(e.target.dataset.index);
+          removeFromCart(index);
+        }
+      });
+    }
+
+    // Đóng modal khi click ngoài nội dung
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('modal') && e.target === elements.productModal) {
+        elements.productModal.classList.remove('active');
+      }
+      if (e.target.classList.contains('modal') && e.target === elements.checkoutSection) {
+        elements.checkoutSection.classList.remove('active');
+      }
+      if (e.target.classList.contains('modal') && e.target === elements.orderConfirmation) {
+        elements.orderConfirmation.classList.remove('active');
+      }
     });
   }
 
-  window.changeSlide = function (n) {
-    slideIndex = (slideIndex + n + slides.length) % slides.length;
-    showSlide(slideIndex);
-  };
-
-  showSlide(slideIndex);
-
-  setInterval(() => {
-    changeSlide(1);
-  }, 5000);
-};
+  // Khởi chạy ứng dụng
+  init();
+});

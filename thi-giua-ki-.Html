@@ -1,30 +1,29 @@
-  <!DOCTYPE html>
-  <html lang="vi">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VIETTEL Shop - Trang Chủ</title>
-    <link rel="stylesheet" href="thi-giua-ki-.css">
-  </head>
-  <body>
-
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VIETTEL Shop - Trang Chủ</title>
+  <link rel="stylesheet" href="thi-giua-ki-.css">
+</head>
+<body>
   <!-- Header -->
   <header class="header">
     <div class="header-container">
       <div class="logo">
         <img src="Viettel store/viettel store.jpg" alt="Shop Logo">
-      </div>  
+      </div>
       <div class="menu-search">
         <button class="menu-btn">☰ Danh mục</button>
         <div class="search-box">
-          <input type="text" placeholder="Tìm kiếm sản phẩm...">
-          <button class="search-btn">🔍</button>
+          <input type="text" id="search-input" placeholder="Tìm kiếm sản phẩm...">
+          <button id="search-btn">🔍</button>
         </div>
       </div>
       <div class="icons">
         <div class="user-icon">👤</div>
         <div class="cart">
-          <a href="#" id="cart-link">🛒 Giỏ hàng <span id="cart-count">(0)</span></a>
+          <a href="#" id="cart-link">🛒 Giỏ hàng <span id="cart-count">0</span></a>
         </div>
       </div>
     </div>
@@ -256,8 +255,8 @@
                         <p>Tai nghe Bluetooth choàng đầu Baseus Bowie D05</p>
                       </div>
                       <div class="item">
-                        <img src="Viettel store/Tai nghe HyperX Cloud II wireless   Red.webp" alt="Tai nghe HyperX Cloud II wireless  Red">
-                        <p>Tai nghe HyperX Cloud II wireless  Red</p>
+                        <img src="Viettel store/Tai nghe HyperX Cloud II wireless Red.webp" alt="Tai nghe HyperX Cloud II wireless Red">
+                        <p>Tai nghe HyperX Cloud II wireless Red</p>
                       </div>
                     </div>
                   </li>
@@ -316,7 +315,7 @@
                     <a href="#">Loa vi tính</a>
                     <div class="subsubmenu">
                       <div class="item">
-                        <img src="Viettel store/Loa vi tính Microlab U210  2.1.webp" alt="Loa vi tính Microlab U210 2.1">
+                        <img src="Viettel store/Loa vi tính Microlab U210 2.1.webp" alt="Loa vi tính Microlab U210 2.1">
                         <p>Loa vi tính Microlab U210 2.1</p>
                       </div>
                       <div class="item">
@@ -471,63 +470,100 @@
     </div>
   </section>
 
-  <!-- Cart Section -->
-  <section class="cart-section" id="cart" style="display: none;">
-    <div class="container">
-      <h2>Giỏ hàng</h2>
-      <p id="empty-cart-message" style="display: none;">Giỏ hàng của bạn đang trống.</p>
-      <div id="cart-container">
-        <table id="cart-table">
-          <thead>
-            <tr>
-              <th>Sản phẩm</th>
-              <th>Giá</th>
-              <th>Số lượng</th>
-              <th>Thành tiền</th>
-              <th>Xóa</th>
-            </tr>
-          </thead>
-          <tbody id="cart-items">
-            <!-- Sản phẩm thêm vào sẽ hiện ở đây -->
-          </tbody>
-        </table>
-        <div id="cart-summary">
-          <p><strong>Tổng cộng: </strong><span id="total-price">0</span> ₫</p>
-          <button id="clear-cart">Xóa giỏ hàng</button>
-          <button id="proceed-to-payment">Xác nhận đơn</button>
+  <!-- Main Content -->
+  <main class="container">
+    <section class="product-section">
+      <h2>Sản phẩm nổi bật</h2>
+      <div class="products" id="products-grid"></div>
+    </section>
+
+    <!-- Product Detail Modal -->
+    <div id="product-modal" class="modal hidden">
+      <div class="modal-content">
+        <span class="close">×</span>
+        <div id="product-detail"></div>
+      </div>
+    </div>
+
+    <!-- Cart Section -->
+    <section class="cart-section" id="cart" style="display: none;">
+      <div class="container">
+        <h2>Giỏ hàng</h2>
+        <p id="empty-cart-message" style="display: none;">Giỏ hàng của bạn đang trống.</p>
+        <div id="cart-container">
+          <table id="cart-table">
+            <thead>
+              <tr>
+                <th>Sản phẩm</th>
+                <th>Giá</th>
+                <th>Số lượng</th>
+                <th>Thành tiền</th>
+                <th>Xóa</th>
+              </tr>
+            </thead>
+            <tbody id="cart-items"></tbody>
+          </table>
+          <div id="cart-summary">
+            <p><strong>Tổng cộng: </strong><span id="total-price">0</span> ₫</p>
+            <button id="clear-cart">Xóa giỏ hàng</button>
+            <button id="proceed-to-payment">Xác nhận đơn</button>
+          </div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- Payment Section -->
-  <section class="payment" id="payment" style="display: none;">
-    <div class="container">
+    <!-- Checkout Section -->
+    <section id="checkout-section" class="hidden">
       <h2>Thanh toán</h2>
-      <div>
-        <p>Thông tin tài khoản ngân hàng:</p>
-        <p>Chủ tài khoản: Phạm Vũ Tuấn Nguyên</p>
-        <p>Số tài khoản: 103879398252</p>
-        <p>Ngân hàng: VietinBank</p>
+      <form id="checkout-form">
+        <div class="form-group">
+          <label for="name">Họ tên:</label>
+          <input type="text" id="name" required>
+        </div>
+        <div class="form-group">
+          <label for="email">Email:</label>
+          <input type="email" id="email" required>
+        </div>
+        <div class="form-group">
+          <label for="phone">Số điện thoại:</label>
+          <input type="tel" id="phone" required>
+        </div>
+        <div class="form-group">
+          <label for="address">Địa chỉ:</label>
+          <textarea id="address" required></textarea>
+        </div>
+        <button type="submit" id="submit-order">Gửi đơn hàng</button>
+      </form>
+    </section>
+
+    <!-- Payment Section -->
+    <section class="payment" id="payment" style="display: none;">
+      <div class="container">
+        <h2>Thanh toán</h2>
+        <div>
+          <p>Thông tin tài khoản ngân hàng:</p>
+          <p>Chủ tài khoản: Phạm Vũ Tuấn Nguyên</p>
+          <p>Số tài khoản: 103879398252</p>
+          <p>Ngân hàng: VietinBank</p>
+        </div>
+        <button id="pay-button">Thanh toán</button>
+        <div id="payment-info"></div>
+        <div id="qr-code" style="display:none;">
+          <div id="qrcode"></div>
+        </div>
       </div>
-      <button id="pay-button">Thanh toán</button>
-      <div id="payment-info"></div>
-      <div id="qr-code" style="display:none;">
-        <div id="qrcode"></div>
+    </section>
+
+    <!-- Order Confirmation -->
+    <div id="order-confirmation" class="modal hidden">
+      <div class="modal-content">
+        <h2>Đặt hàng thành công!</h2>
+        <p>Cảm ơn bạn đã mua hàng tại Viettel Store.</p>
+        <button id="back-to-shop">Quay lại cửa hàng</button>
       </div>
     </div>
-  </section>
+  </main>
 
-  <!-- Liên hệ -->
-  <section class="contact" id="lienhe">
-    <h2>Liên hệ với chúng tôi</h2>
-    <form class="contact-form">
-      <input type="text" placeholder="Họ tên" required>
-      <input type="email" placeholder="Email" required>
-      <textarea placeholder="Nội dung" required></textarea>
-      <button type="submit">Gửi</button>
-    </form>
-  </section>
 
   <!-- Footer -->
   <footer class="footer">
@@ -548,5 +584,5 @@
 
   <!-- JavaScript -->
   <script src="thi-giua-ki-.js"></script>
-  </body>
-  </html>
+</body>
+</html>
