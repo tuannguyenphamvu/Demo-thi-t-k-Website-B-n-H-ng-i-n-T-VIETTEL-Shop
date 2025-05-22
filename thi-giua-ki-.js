@@ -97,7 +97,7 @@ document.addEventListener("DOMContentLoaded", function() {
         <p class="discount-price">${product.discountPrice.toLocaleString()} ₫</p>
         <div class="button-container">
           <button class="view-detail" data-id="${product.id}">Xem chi tiết</button>
-          <button class="buy-button" data-name="${product.name}" data-price="${product.discountPrice}">Mua ngay</button>
+          <button class="buy-button" data-name="${product.name}" data-price="${product.discountPrice}" data-image="${product.image}">Mua ngay</button>
         </div>
       `;
       elements.productsGrid.appendChild(productCard);
@@ -124,7 +124,7 @@ document.addEventListener("DOMContentLoaded", function() {
           <h2 class="product-detail-name">${product.name}</h2>
           <p class="product-detail-price">${product.discountPrice.toLocaleString()} ₫</p>
           <p class="product-detail-desc">${product.description}</p>
-          <button class="buy-button" data-name="${product.name}" data-price="${product.discountPrice}">Mua ngay</button>
+          <button class="buy-button" data-name="${product.name}" data-price="${product.discountPrice}" data-image="${product.image}">Mua ngay</button>
         </div>
       </div>
     `;
@@ -133,11 +133,12 @@ document.addEventListener("DOMContentLoaded", function() {
 
   // ========== CART FUNCTIONS ==========
   function addToCart(name, price, image) {
+    const product = products.find(p => p.name === name);
     const existing = cart.find(item => item.name === name);
     if (existing) {
       existing.quantity += 1;
     } else {
-      cart.push({ name, price, quantity: 1, image });
+      cart.push({ name, price, quantity: 1, image: product ? product.image : image });
     }
     updateCart();
     showToast(`${name} đã được thêm vào giỏ hàng!`);
@@ -169,7 +170,7 @@ document.addEventListener("DOMContentLoaded", function() {
         const row = document.createElement('tr');
         row.innerHTML = `
           <td>
-            <img src="${item.image || 'images/Viettel store/default-product.jpg'}" alt="${item.name}" class="cart-item-img">
+            <img src="${item.image || 'Viettel store/default-product.jpg'}" alt="${item.name}" class="cart-item-img">
             ${item.name}
           </td>
           <td>${item.price.toLocaleString()} ₫</td>
@@ -349,8 +350,9 @@ document.addEventListener("DOMContentLoaded", function() {
         if (e.target.classList.contains('buy-button')) {
           const name = e.target.getAttribute('data-name');
           const price = parseInt(e.target.getAttribute('data-price'));
+          const image = e.target.getAttribute('data-image');
           if (name && !isNaN(price)) {
-            addToCart(name, price, 'images/Viettel store/default-product.jpg');
+            addToCart(name, price, image);
             showCart();
           }
         } else if (e.target.classList.contains('view-detail') || e.target.classList.contains('product-name')) {
@@ -365,8 +367,9 @@ document.addEventListener("DOMContentLoaded", function() {
         button.addEventListener('click', () => {
           const name = button.getAttribute('data-name');
           const price = parseInt(button.getAttribute('data-price'));
+          const image = button.getAttribute('data-image');
           if (name && !isNaN(price)) {
-            addToCart(name, price, 'images/Viettel store/default-product.jpg');
+            addToCart(name, price, image);
             showCart();
           }
         });
