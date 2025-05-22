@@ -220,8 +220,11 @@ document.addEventListener("DOMContentLoaded", function() {
     if (!elements.paymentSection) return;
 
     elements.paymentSection.style.display = "block";
-    if (elements.cartSection) elements.cartSection.style.display = "none";
-    if (elements.checkoutSection) elements.checkoutSection.classList.remove('active');
+    if (elements.cartSection) elements.cartSection.style.display = "block"; // Giữ giỏ hàng hiển thị
+    if (elements.checkoutSection) {
+      elements.checkoutSection.classList.remove('active');
+      elements.checkoutSection.style.display = 'none';
+    }
     elements.paymentSection.scrollIntoView({ behavior: "smooth" });
 
     if (elements.payButton) {
@@ -252,6 +255,12 @@ document.addEventListener("DOMContentLoaded", function() {
     elements.qrCodeDiv.appendChild(qrImage);
 
     showToast("Đơn hàng đã được xác nhận! Vui lòng quét mã QR để thanh toán.");
+
+    // Hiện modal xác nhận đơn hàng thành công
+    if (elements.orderConfirmation) {
+      elements.orderConfirmation.classList.remove('hidden');
+      elements.orderConfirmation.classList.add('active');
+    }
   }
 
   // ========== CHECKOUT FUNCTIONS ==========
@@ -276,12 +285,6 @@ document.addEventListener("DOMContentLoaded", function() {
     if (!/^\d{10,11}$/.test(phone)) {
       showToast('Số điện thoại không hợp lệ!');
       return false;
-    }
-
-    if (elements.orderConfirmation) {
-      elements.orderConfirmation.classList.add('active');
-      if (elements.checkoutSection) elements.checkoutSection.classList.remove('active');
-      clearCart();
     }
 
     return true;
@@ -373,40 +376,79 @@ document.addEventListener("DOMContentLoaded", function() {
       elements.clearCartBtn.addEventListener('click', clearCart);
     }
 
+    // --- Nút "Xác nhận đơn"
     if (elements.proceedButton) {
       elements.proceedButton.addEventListener('click', () => {
         if (cart.length === 0) {
           showToast("Giỏ hàng trống!");
           return;
         }
-        const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-        const names = cart.map(item => item.name).join(", ");
-        if (elements.checkoutSection) elements.checkoutSection.classList.add('active');
-        showPayment(total, names);
+        if (elements.checkoutSection) {
+          elements.checkoutSection.classList.add('active');
+          elements.checkoutSection.style.display = 'block';
+          elements.checkoutSection.scrollIntoView({ behavior: 'smooth' });
+        }
+        // Giữ nguyên giỏ hàng không ẩn
       });
     }
 
+    // --- Xử lý submit form Checkout
     if (elements.checkoutForm) {
       elements.checkoutForm.addEventListener('submit', (e) => {
         e.preventDefault();
         if (processCheckout()) {
-          if (elements.orderConfirmation) elements.orderConfirmation.classList.add('active');
+          // Ẩn phần Checkout Section
+          if (elements.checkoutSection) {
+            elements.checkoutSection.classList.remove('active');
+            elements.checkoutSection.style.display = 'none';
+          }
+          // Hiện Payment Section
+          if (elements.paymentSection) {
+            elements.paymentSection.style.display = "block";
+            elements.paymentSection.scrollIntoView({ behavior: "smooth" });
+          }
         }
       });
     }
 
+    // --- Nút "Thanh toán" trong Payment Section
+    if (elements.payButton) {
+      elements.payButton.addEventListener('click', (event) => {
+        event.preventDefault();
+        const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+        const names = cart.map(item => item.name).join(", ");
+        processPayment(total, names);
+        clearCart(); // Xóa giỏ hàng ngay sau khi thanh toán
+      });
+    }
+
+    // --- Nút "Quay lại cửa hàng" trong modal Order Confirmation
     if (elements.backToShopBtn) {
       elements.backToShopBtn.addEventListener('click', () => {
-        if (elements.orderConfirmation) elements.orderConfirmation.classList.remove('active');
-        if (elements.cartSection) elements.cartSection.style.display = "none";
-        if (elements.paymentSection) elements.paymentSection.style.display = "none";
+        if (elements.orderConfirmation) {
+          elements.orderConfirmation.classList.add('hidden');
+          elements.orderConfirmation.classList.remove('active');
+        }
+        // Ẩn Payment Section khi quay lại
+        if (elements.paymentSection) {
+          elements.paymentSection.style.display = "none";
+        }
+        // Ẩn Cart Section
+        if (elements.cartSection) {
+          elements.cartSection.style.display = "none";
+        }
+        // Đảm bảo giỏ hàng đã được xóa
+        clearCart();
       });
     }
 
     if (elements.closeModal) {
       elements.closeModal.addEventListener('click', () => {
         if (elements.productModal) elements.productModal.classList.remove('active');
-        if (elements.checkoutSection) elements.checkoutSection.classList.remove('active');
+        if (elements.checkoutSection) {
+          elements.checkoutSection.classList.remove('active');
+          elements.checkoutSection.style.display = 'none';
+        }
         if (elements.orderConfirmation) elements.orderConfirmation.classList.remove('active');
       });
     }
@@ -434,6 +476,7 @@ document.addEventListener("DOMContentLoaded", function() {
       }
       if (e.target.classList.contains('modal') && e.target === elements.checkoutSection) {
         elements.checkoutSection.classList.remove('active');
+        elements.checkoutSection.style.display = 'none';
       }
       if (e.target.classList.contains('modal') && e.target === elements.orderConfirmation) {
         elements.orderConfirmation.classList.remove('active');
