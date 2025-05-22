@@ -12,11 +12,11 @@ document.addEventListener("DOMContentLoaded", function() {
       id: 1,
       name: "Loa vi tính SoundMax A828",
       originalPrice: 14390000,
-      discountPrice: 11590000,  
+      discountPrice: 11590000,
       discountPercentage: 19,
       category: "tv",
       image: "Viettel store/Loa vi tính SoundMax A828.webp",
-      description: ""
+      description: "Loa vi tính SoundMax A828 với chất lượng âm thanh sống động, thiết kế hiện đại, phù hợp cho giải trí và làm việc tại nhà."
     },
     {
       id: 2,
@@ -26,7 +26,7 @@ document.addEventListener("DOMContentLoaded", function() {
       discountPercentage: 30,
       category: "appliance",
       image: "Viettel store/Máy lạnh Daikin Inverter 1.5 HP ATKB35ZVMV.webp",
-      description: ""
+      description: "Máy lạnh Daikin Inverter 1.5 HP ATKB35ZVMV tiết kiệm điện, làm lạnh nhanh, vận hành êm ái, lý tưởng cho không gian vừa và nhỏ."
     },
     {
       id: 3,
@@ -36,7 +36,7 @@ document.addEventListener("DOMContentLoaded", function() {
       discountPercentage: 24,
       category: "appliance",
       image: "Viettel store/Loa Bluetooth Karaoke Soundmax M33.webp",
-      description: ""
+      description: "Loa Bluetooth Karaoke Soundmax M33 với âm thanh mạnh mẽ, hỗ trợ hát karaoke, kết nối không dây tiện lợi."
     }
   ];
 
@@ -91,10 +91,14 @@ document.addEventListener("DOMContentLoaded", function() {
       productCard.className = 'product-card';
       productCard.innerHTML = `
         <img src="${product.image}" alt="${product.name}">
-        <h3>${product.name}</h3>
-        <p>${product.discountPrice.toLocaleString()} ₫</p>
-        <button class="add-to-cart" data-id="${product.id}" 
-          data-name="${product.name}" data-price="${product.discountPrice}">Mua ngay</button>
+        <h3 class="product-name" data-id="${product.id}">${product.name}</h3>
+        <p class="original-price">Giá gốc: <del>${product.originalPrice.toLocaleString()} ₫</del></p>
+        <span class="discount-tag">${product.discountPercentage}%</span>
+        <p class="discount-price">${product.discountPrice.toLocaleString()} ₫</p>
+        <div class="button-container">
+          <button class="view-detail" data-id="${product.id}">Xem chi tiết</button>
+          <button class="buy-button" data-name="${product.name}" data-price="${product.discountPrice}">Mua ngay</button>
+        </div>
       `;
       elements.productsGrid.appendChild(productCard);
     });
@@ -120,8 +124,7 @@ document.addEventListener("DOMContentLoaded", function() {
           <h2 class="product-detail-name">${product.name}</h2>
           <p class="product-detail-price">${product.discountPrice.toLocaleString()} ₫</p>
           <p class="product-detail-desc">${product.description}</p>
-          <button class="add-to-cart" data-id="${product.id}"
-            data-name="${product.name}" data-price="${product.discountPrice}">Thêm vào giỏ hàng</button>
+          <button class="buy-button" data-name="${product.name}" data-price="${product.discountPrice}">Mua ngay</button>
         </div>
       </div>
     `;
@@ -220,7 +223,7 @@ document.addEventListener("DOMContentLoaded", function() {
     if (!elements.paymentSection) return;
 
     elements.paymentSection.style.display = "block";
-    if (elements.cartSection) elements.cartSection.style.display = "block"; // Giữ giỏ hàng hiển thị
+    if (elements.cartSection) elements.cartSection.style.display = "block";
     if (elements.checkoutSection) {
       elements.checkoutSection.classList.remove('active');
       elements.checkoutSection.style.display = 'none';
@@ -256,7 +259,6 @@ document.addEventListener("DOMContentLoaded", function() {
 
     showToast("Đơn hàng đã được xác nhận! Vui lòng quét mã QR để thanh toán.");
 
-    // Hiện modal xác nhận đơn hàng thành công
     if (elements.orderConfirmation) {
       elements.orderConfirmation.classList.remove('hidden');
       elements.orderConfirmation.classList.add('active');
@@ -344,10 +346,16 @@ document.addEventListener("DOMContentLoaded", function() {
 
     if (elements.productsGrid) {
       elements.productsGrid.addEventListener('click', (e) => {
-        if (e.target.classList.contains('add-to-cart')) {
+        if (e.target.classList.contains('buy-button')) {
+          const name = e.target.getAttribute('data-name');
+          const price = parseInt(e.target.getAttribute('data-price'));
+          if (name && !isNaN(price)) {
+            addToCart(name, price, 'images/Viettel store/default-product.jpg');
+            showCart();
+          }
+        } else if (e.target.classList.contains('view-detail') || e.target.classList.contains('product-name')) {
           const id = parseInt(e.target.getAttribute('data-id'));
-          const product = products.find(p => p.id === id);
-          if (product) addToCart(product.name, product.discountPrice, product.image);
+          showProductDetail(id);
         }
       });
     }
@@ -376,7 +384,6 @@ document.addEventListener("DOMContentLoaded", function() {
       elements.clearCartBtn.addEventListener('click', clearCart);
     }
 
-    // --- Nút "Xác nhận đơn"
     if (elements.proceedButton) {
       elements.proceedButton.addEventListener('click', () => {
         if (cart.length === 0) {
@@ -388,21 +395,17 @@ document.addEventListener("DOMContentLoaded", function() {
           elements.checkoutSection.style.display = 'block';
           elements.checkoutSection.scrollIntoView({ behavior: 'smooth' });
         }
-        // Giữ nguyên giỏ hàng không ẩn
       });
     }
 
-    // --- Xử lý submit form Checkout
     if (elements.checkoutForm) {
       elements.checkoutForm.addEventListener('submit', (e) => {
         e.preventDefault();
         if (processCheckout()) {
-          // Ẩn phần Checkout Section
           if (elements.checkoutSection) {
             elements.checkoutSection.classList.remove('active');
             elements.checkoutSection.style.display = 'none';
           }
-          // Hiện Payment Section
           if (elements.paymentSection) {
             elements.paymentSection.style.display = "block";
             elements.paymentSection.scrollIntoView({ behavior: "smooth" });
@@ -411,33 +414,28 @@ document.addEventListener("DOMContentLoaded", function() {
       });
     }
 
-    // --- Nút "Thanh toán" trong Payment Section
     if (elements.payButton) {
       elements.payButton.addEventListener('click', (event) => {
         event.preventDefault();
         const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
         const names = cart.map(item => item.name).join(", ");
         processPayment(total, names);
-        clearCart(); // Xóa giỏ hàng ngay sau khi thanh toán
+        clearCart();
       });
     }
 
-    // --- Nút "Quay lại cửa hàng" trong modal Order Confirmation
     if (elements.backToShopBtn) {
       elements.backToShopBtn.addEventListener('click', () => {
         if (elements.orderConfirmation) {
           elements.orderConfirmation.classList.add('hidden');
           elements.orderConfirmation.classList.remove('active');
         }
-        // Ẩn Payment Section khi quay lại
         if (elements.paymentSection) {
           elements.paymentSection.style.display = "none";
         }
-        // Ẩn Cart Section
         if (elements.cartSection) {
           elements.cartSection.style.display = "none";
         }
-        // Đảm bảo giỏ hàng đã được xóa
         clearCart();
       });
     }
@@ -469,7 +467,6 @@ document.addEventListener("DOMContentLoaded", function() {
       });
     }
 
-    // Đóng modal khi click ngoài nội dung
     document.addEventListener('click', (e) => {
       if (e.target.classList.contains('modal') && e.target === elements.productModal) {
         elements.productModal.classList.remove('active');

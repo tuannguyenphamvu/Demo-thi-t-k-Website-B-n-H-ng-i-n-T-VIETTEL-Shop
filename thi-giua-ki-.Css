@@ -282,13 +282,13 @@ body {
   color: #ff6600;
 }
 
-/* 1. Sửa submenu và subsubmenu để tránh chồng ảnh */
+/* SUBMENU */
 .submenu {
   position: absolute;
   background-color: #fff;
-  width: 320px; /* đủ rộng */
-  max-height: 400px; /* giới hạn chiều cao */
-  overflow-y: auto; /* bật thanh cuộn dọc nếu quá cao */
+  width: 320px;
+  max-height: 400px;
+  overflow-y: auto;
   top: 100%;
   left: 0;
   display: none;
@@ -314,9 +314,9 @@ body {
 .subsubmenu {
   position: absolute;
   background-color: #fff;
-  width: 320px; /* đủ rộng */
-  max-height: 420px; /* giới hạn chiều cao */
-  overflow-y: auto; /* bật thanh cuộn dọc nếu quá dài */
+  width: 320px;
+  max-height: 420px;
+  overflow-y: auto;
   top: 0;
   left: 100%;
   display: none;
@@ -324,10 +324,9 @@ body {
   border-radius: 5px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
   padding: 10px 15px;
-
   display: flex;
-  flex-wrap: wrap; /* cho phép xuống dòng */
-  gap: 12px; /* khoảng cách giữa ảnh */
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
 /* Hiển thị submenu/subsubmenu khi hover */
@@ -341,7 +340,7 @@ body {
 
 /* Item trong subsubmenu */
 .subsubmenu .item {
-  width: 120px; /* cố định rộng */
+  width: 120px;
   margin: 10px 5px;
   flex-shrink: 0;
   text-align: center;
@@ -393,7 +392,7 @@ body {
   object-fit: cover;
 }
 
-/* 3. Sửa nền slider và container */
+/* BANNER SLIDER */
 .banner-slider {
   position: relative;
   overflow: hidden;
@@ -401,8 +400,8 @@ body {
   border-radius: 10px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   max-width: 1200px;
-  background-color: white; /* đổi nền trắng */
-  padding: 10px 0; /* tạo khoảng cách trên dưới */
+  background-color: white;
+  padding: 10px 0;
   box-sizing: border-box;
 }
 
@@ -548,6 +547,7 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  min-height: 380px;
 }
 
 .product-card:hover {
@@ -574,10 +574,14 @@ body {
   flex-grow: 1;
 }
 
-.product-card h3:hover {
+.product-card h3.product-name {
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.product-card h3.product-name:hover {
   color: #d9001b;
   text-decoration: underline;
-  cursor: pointer;
 }
 
 .product-card p {
@@ -585,11 +589,59 @@ body {
   font-weight: bold;
   margin: 8px 0 8px 0;
   font-size: 16px;
-  min-height: 24px; /* giữ khoảng cách */
+  min-height: 24px;
   text-align: center;
 }
 
-/* 2. Đồng bộ nút mua ngay, giá sản phẩm */
+/* Button Container */
+.button-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+/* View Detail Button */
+.view-detail {
+  padding: 10px 20px;
+  font-size: 14px;
+  height: 38px;
+  line-height: 18px;
+  display: inline-block;
+  border-radius: 6px;
+  border: 1px solid #d9001b;
+  background-color: #fff;
+  color: #d9001b;
+  cursor: pointer;
+  width: 100%;
+  text-align: center;
+  font-weight: 600;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.view-detail:hover {
+  background-color: #d9001b;
+  color: white;
+}
+
+/* Original Price and Discount Price */
+.original-price {
+  color: #666;
+  font-size: 14px;
+  margin: 8px 0 4px 0;
+  text-align: center;
+}
+
+.discount-price {
+  color: #d9001b;
+  font-weight: bold;
+  font-size: 16px;
+  margin: 4px 0 8px 0;
+  text-align: center;
+}
+
+/* Buy and Add to Cart Buttons */
 .product-card .buy-button,
 .product-card .add-to-cart,
 .product-card .coming-soon {
@@ -617,6 +669,15 @@ body {
   background-color: #ff6600;
 }
 
+.product-card .add-to-cart {
+  background-color: #ff6600;
+  color: white;
+}
+
+.product-card .add-to-cart:hover {
+  background-color: #d9001b;
+}
+
 .product-card .coming-soon {
   background-color: #666;
   cursor: not-allowed;
@@ -627,11 +688,6 @@ body {
 
 .product-card .coming-soon:hover {
   background-color: #666;
-}
-
-/* Giữ khoảng cách nút và giá */
-.product-card p {
-  margin-bottom: 10px;
 }
 
 /* Discount tag */
